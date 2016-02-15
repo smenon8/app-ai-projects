@@ -1,10 +1,3 @@
-/*
-	Description: (outdated) This clp file contains the type definition for the person in consideration.
-	Author: Sreejith Menon
-	UIN: 673420442
-	Date of Creation: 01/22/2016
-*/
-
 (deftemplate person
     (slot personName)
     (slot age (type INTEGER))
