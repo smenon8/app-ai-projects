@@ -8,6 +8,7 @@ from sklearn.metrics import roc_curve, auc
 from sklearn.cross_validation import train_test_split
 import math
 
+
 # shuffle and split training and test sets
 def splitTrainTest(splitRatio,fullData):
     if not fullData:
@@ -75,16 +76,6 @@ def treeClassifier(trainTestProp,fullDataParam = False):
     fpf = falsePos/totalPositives
     tnf = trueNeg/totalNegatives
     fnf = falseNeg/totalNegatives
-#     print("Accuracy %f" %accuracy)
-#     print("True positives: %d Total positives: %d" %(truePos,totalPositives))
-#     print("False positives: %d Total positives: %d" %(falsePos,totalPositives))
-#     print("True negatives: %d Total negatives: %d" %(trueNeg,totalNegatives))
-#     print("False negatives: %d Total negatives: %d" %(falseNeg,totalNegatives))
-    
-#     print("TPF %f" %tpf)
-#     print("FPF %f" %fpf)
-#     print("TNF %f" %tnf)
-#     print("FNF %f" %fnf) 
     
     return accuracy,tpf,fpf,tnf,fnf
 
@@ -102,9 +93,44 @@ for i in np.arange(0.1,1,0.1):
     TNF.append(tnf)
     FNF.append(fnf)
 
+
+# calculate the area of a triangle given by points on roc curve
+areaAll = []
+
+for i in range(len(FNF)):
+    start = (0,0) # A
+    between = (FNF[i],TNF[i]) # B
+    end = (1,1) # C
+
+    AB = math.sqrt((start[0] - between[0])**2 + (start[1] - between[1])**2)
+    BC = math.sqrt((end[0] - between[0])**2 + (end[1] - between[1])**2)
+    AC = math.sqrt((start[0] - end[0])**2 + (start[1] - end[1])**2)
+
+    s = (AB + BC + AC) / 2
+    area = (s*(s-AB)*(s-BC)*(s-AC)) ** 0.5
+    areaAll.append(area)
+
+## Print output 
+for i in range(len(accuracy)):
+    print("Current split %f - %f" %((i*10)+10,(100-i*10)-10))
+    print("Accuracy : %f" %(accuracy[i]))
+    print("Area under the ROC curve : %f" %areaAll[i])
+    print()
+
 # Accuracy plot
+x = np.arange(0.1,1,0.1)
+z = np.polyfit(x,accuracy, 2)
+f = np.poly1d(z)
+
+x_new = np.linspace(x[0], x[-1], 50)
+y_new = f(x_new)
+
 plt.figure(1)
-plt.plot(np.arange(0.1,1,0.1),accuracy)
+plt.plot(x,accuracy,'o')
+plt.plot(x_new,y_new,lw=2)
+plt.xlabel("Train data - Test data split")
+plt.ylabel("Accuracy percentage")
+plt.title("Train-test split versus accuracy, fitted to a 2 degree polynomial curve")
 
 # Plot for negative estimations
 z = np.polyfit(FNF, TNF, 2)
@@ -114,42 +140,19 @@ x_new = np.linspace(FNF[0], FNF[-1], 50)
 y_new = f(x_new)
 
 plt.figure(2)
-plt.plot(FNF,TNF,'o', x_new, y_new)
-plt.plot([0, x_new[49]], [0,y_new[49]],lw=2)
-plt.plot([x_new[0],1],[y_new[0],1], lw=2)
-plt.plot([0, 0.5,1],[0, 0.5,1], lw=2)
-
-# Plot for positive estimations
-z = np.polyfit(FPF, TPF, 2)
-f = np.poly1d(z)
-
-x_new = np.linspace(FPF[0], FPF[-1], 50)
-y_new = f(x_new)
+plt.plot(FNF,TNF,'o')
+plt.xlabel("False Unsatisfied Customer Fraction")
+plt.ylabel("True Unsatisfied Customer Fraction")
+plt.title("ROC curve candidate points for all Unsatisfied Customers")
 
 plt.figure(3)
 plt.plot(FNF,TNF,'o', x_new, y_new)
 plt.plot([0, x_new[49]], [0,y_new[49]],lw=2)
 plt.plot([x_new[0],1],[y_new[0],1], lw=2)
 plt.plot([0, 0.5,1],[0, 0.5,1], lw=2)
+plt.xlabel("False Unsatisfied Customer Fraction")
+plt.ylabel("True Unsatisfied Customer Fraction")
+plt.title("ROC curve - representational area under the curve, zoom to the top left to see all points")
+
 
 plt.show()
-
-# calculate the area of a triangle given by points on roc curve
-for i in range(1,50):
-    start = (0,0) # A
-    between = (x_new[i],y_new[i]) # B
-    end = (1,1) # C
-
-    AB = math.sqrt((start[0] - between[0])**2 + (start[1] - between[1])**2)
-    BC = math.sqrt((end[0] - between[0])**2 + (end[1] - between[1])**2)
-    AC = math.sqrt((start[0] - end[0])**2 + (start[1] - end[1])**2)
-
-    s = (AB + BC + AC) / 2
-    area = (s*(s-AB)*(s-BC)*(s-AC)) ** 0.5
-    print(area)
-
-
-# In[ ]:
-
-
-
