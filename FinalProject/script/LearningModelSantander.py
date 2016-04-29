@@ -107,7 +107,7 @@ for i in range(len(FNF)):
     AC = math.sqrt((start[0] - end[0])**2 + (start[1] - end[1])**2)
 
     s = (AB + BC + AC) / 2
-    area = (s*(s-AB)*(s-BC)*(s-AC)) ** 0.5
+    area = 0.5 + (s*(s-AB)*(s-BC)*(s-AC)) ** 0.5
     areaAll.append(area)
 
 ## Print output 
